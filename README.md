@@ -21,7 +21,9 @@ depot start
 >>> d_client.get("key")
     value
 ```
+3. Use the same key from any process while the server is running, and it persists the value saved from the purticular instance.
 
+__depot__ can be considered as a pure python implementation of __redis__, using multiprocessing.Manager
 
 ## License
 
