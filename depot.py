@@ -41,7 +41,7 @@ class DepotClient(Depot):
             return False
 
     def delete(self, key):
-        self.sync_depot.update([{key, None}])
+        self.sync_depot.update([(key, None)])
 
     def get(self, key):
         try:
