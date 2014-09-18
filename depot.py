@@ -60,7 +60,7 @@ class DepotDaemon(Daemon):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='start|stop|restart')
+    parser = argparse.ArgumentParser(description='start|stop|restart|version')
     parser.add_argument('status', action="store", type=str)
     # depot_daemon = DepotDaemon()
     # daemon_runner = runner.DaemonRunner(depot_daemon)
@@ -72,5 +72,5 @@ if __name__ == "__main__":
         depot_daemon.stop()
     elif parser.parse_args().status == "restart":
         depot_daemon.restart()
-    else:
+    elif parser.parse_args().status =="version":
         print "Depot v%s (https://github.com/atmb4u/depot/) \ndepot -h for help" % __VERSION__
