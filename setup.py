@@ -1,10 +1,11 @@
+from depot import __VERSION__
 from setuptools import setup, find_packages # Always prefer setuptools over distutils
 setup(
 name='python-depot',
 # Versions should comply with PEP440. For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # http://packaging.python.org/en/latest/tutorial.html#version
-version='1.01',
+version=__VERSION__,
 description='Shared variables for python processes',
 long_description="Easy way to share a python data structure between modules in python using multiprocessing.Manager",
 # The project's main homepage.

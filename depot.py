@@ -4,6 +4,8 @@ import argparse
 from multiprocessing.managers import SyncManager
 from daemon import Daemon
 
+__VERSION__ = "1.0.2"
+
 
 class Depot(object):
     sync_depot = {}
@@ -70,3 +72,5 @@ if __name__ == "__main__":
         depot_daemon.stop()
     elif parser.parse_args().status == "restart":
         depot_daemon.restart()
+    else:
+        print "Depot v%s (https://github.com/atmb4u/depot/) \ndepot -h for help" % __VERSION__
