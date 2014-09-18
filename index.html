@@ -20,7 +20,7 @@
     <header>
       <div class="inner">
         <h1>Depot</h1>
-        <h2>Shared variables for parallel Python processes</h2>
+        <h2>Shared variables for parallel running Python modules</h2>
         <a href="https://github.com/atmb4u/depot" class="button"><small>View project on</small>GitHub</a>
       </div>
     </header>
@@ -57,6 +57,10 @@
     value
 </code></pre>
 
+<p>3.Use the same key from any process while the server is running, and it persists the value saved from the purticular instance.</p>
+
+<p><strong>depot</strong> can be considered as a pure python implementation of <strong>redis</strong>, using multiprocessing.Manager</p>
+
 <h2>
 <a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
@@ -80,6 +84,16 @@
       </div>
     </div>
 
-  
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-54947834-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
