@@ -8,6 +8,10 @@ __VERSION__ = "1.0.2"
 
 
 class Depot(object):
+    """
+    Depot object is the parent object to create SyncManager with 
+    args: ip, port, key
+    """
     sync_depot = {}
 
     def __init__(self, ip="127.0.0.1", port=9000, key="random_key"):
@@ -18,17 +22,22 @@ class Depot(object):
 
 
 class DepotServer(Depot):
+    """
+    Class for Depot server. start_server function creates a manager
+    and waits for requests
+    """
 
     def start_server(self):
         SyncManager.register("sync_depot", self.get_depot)
         self.manager.start()
         self.manager.join()
         raw_input("Press any key to kill server".center(50, "-"))
-        # self.manager.shutdown()
 
 
 class DepotClient(Depot):
-
+    """
+    DepotClient is used to connect to the server and to get and set data
+    """
     def __init__(self, ip="127.0.0.1", port=9000, key="random_key"):
         self.manager = SyncManager((ip, port), authkey=key)
         SyncManager.register("sync_depot")
@@ -36,6 +45,9 @@ class DepotClient(Depot):
         self.sync_depot = self.manager.sync_depot()
 
     def set(self, key, value):
+        """
+        Update key with corresponding value
+        """
         try:
             self.sync_depot.update([(key, value)])
         except (EOFError, IOError):
@@ -43,9 +55,15 @@ class DepotClient(Depot):
             return False
 
     def delete(self, key):
+        """
+        delete the value stored in the key and sets it to None
+        """
         self.sync_depot.update([(key, None)])
 
     def get(self, key):
+        """
+        Get the data stored in a particular 'key'
+        """
         try:
             return self.get_depot().get(key)
         except (EOFError, IOError):
@@ -54,6 +72,9 @@ class DepotClient(Depot):
 
 
 class DepotDaemon(Daemon):
+    """
+    Start the depot server in daemon mode
+    """
     def run(self):
         d = DepotServer()
         d.start_server()
@@ -62,9 +83,6 @@ class DepotDaemon(Daemon):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='start|stop|restart|version')
     parser.add_argument('status', action="store", type=str)
-    # depot_daemon = DepotDaemon()
-    # daemon_runner = runner.DaemonRunner(depot_daemon)
-    # daemon_runner.do_action()
     depot_daemon = DepotDaemon('/tmp/depot.pid')
     if parser.parse_args().status == "start":
         depot_daemon.start()
