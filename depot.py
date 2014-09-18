@@ -4,7 +4,7 @@ import argparse
 from multiprocessing.managers import SyncManager
 from daemon import Daemon
 
-__VERSION__ = "1.0.2"
+__VERSION__ = "1.0.3"
 
 
 class Depot(object):
