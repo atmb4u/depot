@@ -1,2 +1,3 @@
-include daemon.py
+include depot
 include depot.py
+include daemon.py
