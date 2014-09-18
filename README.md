@@ -1,7 +1,14 @@
-# Depot v0.9
+# Depot v1.0
 ## Shared variables for parallel python processes
 
-## How to use
+
+## Installation
+
+```
+$ pip install python-depot
+```
+
+## Usage
 1. Run the server 
 ```
 depot start
@@ -12,11 +19,12 @@ depot start
 >>> d_client = DepotClient()
 >>> d_client.set("key", "value")
 >>> d_client.get("key")
-value
+    value
 ```
 
-## Installation
 
-```
-$ pip install python-depot
-```
+## License
+
+3-clause BSD License
+
+
