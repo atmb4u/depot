@@ -1,5 +1,5 @@
 # Depot v1.0
-## Shared variables for parallel python processes
+## Shared variables in-between Python modules
 
 
 ## Installation
