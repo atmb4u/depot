@@ -90,5 +90,5 @@ if __name__ == "__main__":
         depot_daemon.stop()
     elif parser.parse_args().status == "restart":
         depot_daemon.restart()
-    elif parser.parse_args().status =="version":
+    elif parser.parse_args().status == "version":
         print "Depot v%s (https://github.com/atmb4u/depot/) \ndepot -h for help" % __VERSION__
