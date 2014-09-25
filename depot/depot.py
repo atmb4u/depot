@@ -94,11 +94,13 @@ class DepotDaemon(Daemon):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='start|stop|restart|version')
+    parser = argparse.ArgumentParser(description='test|start|stop|restart|version')
     parser.add_argument('status', action="store", type=str)
     depot_daemon = DepotDaemon('/tmp/depot.pid')
-    if parser.parse_args().status == "start":
+    if parser.parse_args().status == "test":
         depot_server()
+    if parser.parse_args().status == "start":
+        depot_daemon.start()
     elif parser.parse_args().status == "stop":
         depot_daemon.stop()
     elif parser.parse_args().status == "restart":
