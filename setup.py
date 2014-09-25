@@ -1,4 +1,4 @@
-from depot import __VERSION__
+from depot.depot import __VERSION__
 from setuptools import setup, find_packages # Always prefer setuptools over distutils
 setup(
 name='python-depot',
@@ -15,7 +15,7 @@ author='Anoop Thomas Mathew',
 author_email='atmb4u@gmail.com',
 # Choose your license
 license='3-clause BSD License',
-scripts=['depot', 'daemon.py'],
+scripts=['depot/depot', 'depot/daemon.py'],
 # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
 classifiers=[
 'Development Status :: 4 - Beta',

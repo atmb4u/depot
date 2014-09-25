@@ -1,4 +1,4 @@
-include depot
-include depot.py
-include daemon.py
-include __init__.py
+include depot/depot
+include depot/depot.py
+include depot/daemon.py
+include depot/__init__.py
