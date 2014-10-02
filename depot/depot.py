@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import argparse
+from random import randrange
+import uuid
 from multiprocessing.managers import SyncManager
 from daemon import Daemon
 
@@ -13,6 +15,8 @@ from cPickle import dumps, loads
 
 def depot_server(dict_size=4096):
     data_store = {}
+    lock_list = []
+    secret_dict = {}
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
         os.remove("/tmp/depotsocket")
@@ -27,15 +31,49 @@ def depot_server(dict_size=4096):
         if data:
             packet = loads(data)
             operation = packet.get('operation')
+            key = packet.get('key')
+            secret = packet.get('secret')
+            print data_store
             if operation == "UPDATE":
-                data_store.update(packet.get('data'))
-                print data_store
-                conn.send("S'True'\np1\n.")
+                if key not in lock_list:
+                    data_store.update(packet.get('data'))
+                    conn.send('I01\n.')
+                else:
+                    if secret_dict.get(key) == secret:
+                        data_store.update(packet.get('data'))
+                        conn.send('I01\n.')
+                    else:
+                        conn.send('I00\n.')
+            elif operation == "SET":
+                if key not in lock_list:
+                    data_store[packet.get('key')] = packet.get('value')
+                    conn.send('I01\n.')
+                else:
+                    if secret_dict.get(key) == secret:
+                        data_store[packet.get('key')] = packet.get('value')
+                        conn.send('I01\n.')
+                    else:
+                        conn.send('I00\n.')
             elif operation == "GET":
                 conn.send(dumps(data_store.get(packet.get('key'))))
-            elif operation == "DELETE":
+            elif operation == "GETLOCK":
+                lock_list.append(packet.get("key"))
+                rand = randrange(0, 10)
+                secret = uuid.uuid4().get_hex()[rand: rand + 3]
+                secret_dict[key] = secret
+                conn.send(dumps(secret))
+            elif operation == "FREELOCK":
+                if secret_dict[key] == packet.get("secret"):
+                    lock_list.remove(packet.get("key"))
+                    # secret_dict.pop(key)
+                    conn.send('I01\n.')
+                else:
+                    conn.send('I00\n.')
+            elif operation == "DELETE" and key not in lock_list:
                 data_store.__delitem__(packet.get('key'))
-                conn.send("S'True'\np1\n.")
+                conn.send('I01\n.')
+            elif operation == "GETLOCKID":
+                conn.send(dumps(secret_dict[key]))
         conn.close()
 
 
@@ -73,11 +111,57 @@ class DepotClient(object):
         data = loads(self.sock.recv(self.dict_size))
         return data
 
+    def getlockid(self, key):
+        self.initialize()
+        self.sock.send(dumps({
+            'operation': 'GETLOCKID',
+            'key': key,
+        }
+        )
+        )
+        data = loads(self.sock.recv(self.dict_size))
+        return data
+
     def get(self, key):
         self.initialize()
         self.sock.send(dumps({
             'operation': 'GET',
             'key': key,
+        }
+        )
+        )
+        data = loads(self.sock.recv(self.dict_size))
+        return data
+
+    def getlock(self, key):
+        self.initialize()
+        self.sock.send(dumps({
+            'operation': 'GETLOCK',
+            'key': key,
+        }
+        )
+        )
+        data = loads(self.sock.recv(self.dict_size))
+        return data
+
+    def freelock(self, key, secret):
+        self.initialize()
+        self.sock.send(dumps({
+            'operation': 'FREELOCK',
+            'key': key,
+            'secret': secret
+        }
+        )
+        )
+        data = loads(self.sock.recv(self.dict_size))
+        return data
+
+    def set(self, key, value):
+        self.initialize()
+        self.sock.send(dumps({
+            'operation': 'SET',
+            'key': key,
+            'value': value,
         }
         )
         )
