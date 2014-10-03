@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import argparse
+from hashlib import md5
 from random import randrange
+import threading
+from time import sleep
 import uuid
 from multiprocessing.managers import SyncManager
 from daemon import Daemon
@@ -25,7 +28,7 @@ def depot_server(dict_size=4096):
     print "Starting ..  ."
     s.bind("/tmp/depotsocket")
     while 1:
-        s.listen(1)
+        s.listen(4)
         conn, addr = s.accept()
         data = conn.recv(dict_size)
         if data:
@@ -34,34 +37,33 @@ def depot_server(dict_size=4096):
             key = packet.get('key')
             secret = packet.get('secret')
             print data_store
-            if operation == "UPDATE":
+            if operation == "SET":
+                data_store[packet.get('key')] = packet.get('value')
+                conn.send('I01\n.')
+            elif operation == "GET":
+                conn.send(dumps(data_store.get(packet.get('key'))))
+            elif operation == "UPDATE":
                 if key not in lock_list:
                     data_store.update(packet.get('data'))
                     conn.send('I01\n.')
                 else:
                     if secret_dict.get(key) == secret:
-                        data_store.update(packet.get('data'))
+                        data_store[key] = packet.get('data')
+                        secret_dict.pop(key)
                         conn.send('I01\n.')
                     else:
                         conn.send('I00\n.')
-            elif operation == "SET":
-                if key not in lock_list:
-                    data_store[packet.get('key')] = packet.get('value')
-                    conn.send('I01\n.')
-                else:
-                    if secret_dict.get(key) == secret:
-                        data_store[packet.get('key')] = packet.get('value')
-                        conn.send('I01\n.')
-                    else:
-                        conn.send('I00\n.')
-            elif operation == "GET":
-                conn.send(dumps(data_store.get(packet.get('key'))))
-            elif operation == "GETLOCK":
-                lock_list.append(packet.get("key"))
-                rand = randrange(0, 10)
-                secret = uuid.uuid4().get_hex()[rand: rand + 3]
-                secret_dict[key] = secret
-                conn.send(dumps(secret))
+            elif operation == "GETLOCKED":
+                while 1:
+                    print secret_dict
+                    if not secret_dict.get(key):
+                        lock_list.append(packet.get("key"))
+                        ran = randrange(0, 10)
+                        secret_dict[key] = md5().hexdigest()[ran:ran+3]
+                        print data_store.get(packet.get('key')), secret_dict[key]
+                        conn.send(dumps((data_store.get(packet.get('key')), secret_dict[key])))
+                        break
+                    # sleep(0.01)
             elif operation == "FREELOCK":
                 if secret_dict[key] == packet.get("secret"):
                     lock_list.remove(packet.get("key"))
@@ -86,19 +88,18 @@ class DepotClient(object):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.connect(socket_path)
 
-    def update(self, data):
+    def update(self, key, data, secret):
         self.initialize()
-        if type(data) == dict:
-            self.sock.send(dumps({
-                'operation': 'UPDATE',
-                'data': data,
-            }
-            )
-            )
-            data = loads(self.sock.recv(self.dict_size))
-            return data
-        else:
-            print "Requires dict type object to push."
+        self.sock.send(dumps({
+            'operation': 'UPDATE',
+            'data': data,
+            'key': key,
+            'secret': secret
+        }
+        )
+        )
+        data = loads(self.sock.recv(self.dict_size))
+        return data
 
     def delete(self, key):
         self.initialize()
@@ -133,10 +134,10 @@ class DepotClient(object):
         data = loads(self.sock.recv(self.dict_size))
         return data
 
-    def getlock(self, key):
+    def getlocked(self, key):
         self.initialize()
         self.sock.send(dumps({
-            'operation': 'GETLOCK',
+            'operation': 'GETLOCKED',
             'key': key,
         }
         )
