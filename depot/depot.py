@@ -9,7 +9,7 @@ import uuid
 from multiprocessing.managers import SyncManager
 from daemon import Daemon
 
-__VERSION__ = "1.0.7"
+__VERSION__ = "1.0.8"
 
 import socket
 import os
